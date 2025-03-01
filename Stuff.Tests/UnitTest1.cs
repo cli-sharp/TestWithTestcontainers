@@ -16,10 +16,11 @@ public class Tests
         container = new ContainerBuilder().
             WithImage("redis/redis-stack:latest").
             WithPortBinding(6379, 6379).
-            // WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(6379)). this unfortunately doesn't work
+            WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(6379)).
+            WithWaitStrategy(Wait.ForUnixContainer().UntilMessageIsLogged("Ready to accept connections")).
             Build();
         await container.StartAsync();
-        await Task.Delay(3000); // this sucks but it works, apparently we have to wait for redis to start
+        await Task.Delay(3000); // The wait strategies don't seem to work
         worker = new Worker(
             NullLogger<Worker>.Instance, ConnectionMultiplexer.Connect("localhost"));
     }
